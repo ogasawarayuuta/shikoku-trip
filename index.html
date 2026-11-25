@@ -528,7 +528,7 @@ function drawCands(){G.cand.clearLayers();const gs=new Map();
   for(const c of dayCands(S.day)){if(inPlan(c.ref)||c.o.lat==null)continue;const k=c.o.lat.toFixed(4)+','+c.o.lon.toFixed(4);if(!gs.has(k))gs.set(k,[]);gs.get(k).push(c);}
   for(const g of gs.values()){const ll=[g[0].o.lat,g[0].o.lon],refs=g.map(c=>c.ref);
     L.marker(ll,{icon:L.divIcon({className:'lw',html:`<div class="cd"><span>${ICON[g[0].t]}</span>${g.length>1?'<em>'+g.length+'</em>':''}</div>`,iconSize:[28,28],iconAnchor:[14,14]}),zIndexOffset:-200,keyboard:false}).addTo(G.cand).on('click',()=>openPop(ll,()=>refs.map(r=>candHTML(pref(r),1)).join('<hr>')));}}
-function flagIcon(c,n){return L.divIcon({className:'lw',html:`<div class="fl"><svg width="30" height="40" viewBox="0 0 30 40"><path d="M5 38V3" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M6 4h19l-5 6 5 6H6z" fill="${c}" stroke="#0009"/></svg>${n?'<em>👍'+n+'</em>':''}</div>`,iconSize:[30,40],iconAnchor:[5,38],popupAnchor:[9,-34]});}
+function flagIcon(c,n){return L.divIcon({className:'lw',html:`<div class="fl"><svg width="30" height="40" viewBox="0 0 30 40"><path d="M5 38V3" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M6 4h19l-5 6 5 6H6z" fill="${c}" stroke="#0009"/></svg></div>`,iconSize:[30,40],iconAnchor:[5,38],popupAnchor:[9,-34]});}
 function drawProps(){G.props.clearLayers();S.props.filter(p=>p.status==='open'&&dayOfProp(p)===S.day).forEach(p=>{L.marker([p.lat,p.lon],{icon:flagIcon(p.color,p.votes.length),zIndexOffset:800,keyboard:false}).addTo(G.props).on('click',()=>openPop([p.lat,p.lon],()=>propHTML(p.id),[9,-34]));});}
 function drawStops(){if(S.drag)return;G.stops.clearLayers();stopMk=[];const d=curDay(),sc=sched(d,S.mode),n=d.stops.length,xy=d.stops.map(s=>map.latLngToContainerPoint([s.lat,s.lon]));
   d.stops.forEach((s,j)=>{const t=j===0?sc.dep:sc.stops[j].arr,pd=j>0&&sc.legs[j-1].pend,lb=j===0?'出':j===n-1?'着':j,lf=xy.some((q,k)=>k!==j&&q.x-xy[j].x>-8&&q.x-xy[j].x<82&&Math.abs(q.y-xy[j].y)<22);
@@ -725,12 +725,12 @@ function propHTML(id,list,k){const p=S.props.find(x=>x.id===id);if(!p)return nul
   let h=`<div class="sticky ${p.status}" style="--pc:${p.color};--rot:${rot.toFixed(1)}deg"><div class="sh"><i></i>${esc(p.by)}<small>${di+1}日目 · ${fmtAt(p.createdAt)}</small></div><div class="sn">${r?ICON[r.t]:'🚩'} ${esc(p.name||'寄り道')}</div>${p.comment?`<div class="sc">「${esc(p.comment)}」</div>`:''}`;
   if(r&&r.t!=='hotels')h+=`<div class="sx">${openB(r.o.open_on_trip_day)} ${esc(r.o.hours_march||r.o.hours)}</div>`;
   if(p.status==='adopted')h+='<span class="stamp">採用</span>';else if(p.status==='declined')h+='<span class="stamp">見送り</span>';
-  h+=`<div class="sa"><button data-a="vote" data-id="${esc(p.id)}" class="${mine?'on':''}" aria-label="いいね">👍 ${p.votes.length}</button>`;
+  h+=`<div class="sa">`;
   if(p.status==='open')h+=`<button class="pri" data-a="adopt" data-id="${esc(p.id)}">採用</button><button data-a="decline" data-id="${esc(p.id)}">見送り</button>`;
   else if(p.status==='declined')h+=`<button data-a="reopen" data-id="${esc(p.id)}">↺ 戻す</button>`;
   if(list)h+=`<button data-a="pfocus" data-id="${esc(p.id)}" aria-label="地図で見る">📍</button>`;
-  h+='</div>';if(p.votes.length)h+=`<div class="sx">👍 ${p.votes.map(esc).join('・')}</div>`;return h+'</div>';}
-function tabProp(){const ps=S.props.slice().sort((a,b)=>b.votes.length-a.votes.length||b.createdAt-a.createdAt),op=ps.filter(p=>p.status==='open');
+  h+='</div>';return h+'</div>';}
+function tabProp(){const ps=S.props.slice().sort((a,b)=>b.createdAt-a.createdAt),op=ps.filter(p=>p.status==='open');
   const td=op.filter(p=>dayOfProp(p)===S.day),ot=op.filter(p=>dayOfProp(p)!==S.day),dn=ps.filter(p=>p.status!=='open'),grid=a=>'<div class="stk">'+a.map((p,k)=>propHTML(p.id,1,k)).join('');
   let h=`<h4>${S.day+1}日目</h4>`+grid(td)+'<button class="sticky new" data-a="newflag" aria-label="ここ寄りたい">🚩＋</button></div>';
   if(ot.length)h+='<h4>ほかの日</h4>'+grid(ot)+'</div>';
